@@ -37,11 +37,12 @@ async function run() {
     //POST: Api endpoint to add a new service to mongodb
     app.post("/service", async (req, res) => {
       const data = req.body;
-      const result = await services.insertOne();
+      // console.log(data)
+      const result = await services.insertOne(data);
 
       res.send({
         success: true,
-        message: "service added successfully!",
+        result
       });
     });
 
