@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-require('dotenv').config()
+require("dotenv").config();
 const { MongoClient, ServerApiVersion } = require("mongodb");
 
 const app = express();
@@ -8,8 +8,7 @@ const port = 3000;
 app.use(cors());
 app.use(express.json());
 
-const uri =
-  `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.zbdwt9q.mongodb.net/?appName=Cluster0`;
+const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.zbdwt9q.mongodb.net/?appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -28,10 +27,20 @@ async function run() {
     const db = client.db("HomeFixo");
     const services = db.collection("services");
 
-    // GET: Api endpoint for fetching all the services data from mongodb
+    // GET:
+    // Api endpoint for fetching all the services data from mongodb
     app.get("/services", async (req, res) => {
       const result = await services.find().toArray();
       res.send(result);
+    });
+    // Api endpoint for fetching only provider's services data from mongodb
+    app.get("/my-services", async (req, res) => {
+      // console.log(req.user)
+      const email = req.query.email;
+
+      const result = await services.find({ email: email }).toArray();
+
+      res.send({ success: true, result });
     });
 
     //POST: Api endpoint to add a new service to mongodb
@@ -42,7 +51,7 @@ async function run() {
 
       res.send({
         success: true,
-        result
+        result,
       });
     });
 
