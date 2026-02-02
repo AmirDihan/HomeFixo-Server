@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const app = express();
 const port = 3000;
@@ -42,6 +42,15 @@ async function run() {
 
       res.send({ success: true, result });
     });
+    //Api endpoint for fetching a single service data using its _id
+    app.get("/service-details/:id", async (req, res) => {
+      const { id } = req.params;
+      console.log(id);
+      const result = await services.findOne({ _id: new ObjectId(id) });
+      // console.log(result);
+
+      res.send({ success: true, result });
+    });
 
     //POST: Api endpoint to add a new service to mongodb
     app.post("/service", async (req, res) => {
@@ -54,6 +63,24 @@ async function run() {
         result,
       });
     });
+
+
+    // PUT/PATCH
+    app.put('/edit-service/:id', async (req,res) => {
+      const data = req.body;
+      const {id} = req.params;
+      console.log(id)
+      console.log(data);
+
+      const filter = {_id : new ObjectId(id)}
+      const update = {
+        $set: data
+      }
+
+      const result = await services.updateOne(filter, update)
+
+      res.send({success:true, result})
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
