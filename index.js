@@ -45,7 +45,7 @@ async function run() {
     //Api endpoint for fetching a single service data using its _id
     app.get("/service-details/:id", async (req, res) => {
       const { id } = req.params;
-      console.log(id);
+      // console.log(id);
       const result = await services.findOne({ _id: new ObjectId(id) });
       // console.log(result);
 
@@ -69,8 +69,8 @@ async function run() {
     app.put('/edit-service/:id', async (req,res) => {
       const data = req.body;
       const {id} = req.params;
-      console.log(id)
-      console.log(data);
+      // console.log(id)
+      // console.log(data);
 
       const filter = {_id : new ObjectId(id)}
       const update = {
@@ -80,6 +80,16 @@ async function run() {
       const result = await services.updateOne(filter, update)
 
       res.send({success:true, result})
+    })
+
+     //DELETE
+    app.delete('/delete-service/:id', async (req,res) => {
+      const {id} = req.params;
+      // console.log(id)
+
+      const result = await services.deleteOne({_id: new ObjectId(id)})
+
+      res.send({success: true, result})
     })
 
     // Send a ping to confirm a successful connection
