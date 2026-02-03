@@ -26,6 +26,7 @@ async function run() {
 
     const db = client.db("HomeFixo");
     const services = db.collection("services");
+    const bookings = db.collection("bookings");
 
     // GET:
     // Api endpoint for fetching all the services data from mongodb
@@ -64,33 +65,43 @@ async function run() {
       });
     });
 
+    app.post("/booking", async (req, res) => {
+      const data = req.body;
+      console.log(data);
+      const result = await bookings.insertOne(data);
+      
+      res.send({
+        success: true,
+        result,
+      })
+    });
 
     // PUT/PATCH
-    app.put('/edit-service/:id', async (req,res) => {
+    app.put("/edit-service/:id", async (req, res) => {
       const data = req.body;
-      const {id} = req.params;
+      const { id } = req.params;
       // console.log(id)
       // console.log(data);
 
-      const filter = {_id : new ObjectId(id)}
+      const filter = { _id: new ObjectId(id) };
       const update = {
-        $set: data
-      }
+        $set: data,
+      };
 
-      const result = await services.updateOne(filter, update)
+      const result = await services.updateOne(filter, update);
 
-      res.send({success:true, result})
-    })
+      res.send({ success: true, result });
+    });
 
-     //DELETE
-    app.delete('/delete-service/:id', async (req,res) => {
-      const {id} = req.params;
+    //DELETE
+    app.delete("/delete-service/:id", async (req, res) => {
+      const { id } = req.params;
       // console.log(id)
 
-      const result = await services.deleteOne({_id: new ObjectId(id)})
+      const result = await services.deleteOne({ _id: new ObjectId(id) });
 
-      res.send({success: true, result})
-    })
+      res.send({ success: true, result });
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
