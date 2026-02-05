@@ -34,10 +34,8 @@ async function run() {
       const limit = req.query.limit;
       // console.log(limit);
       var result;
-      if(limit)
-        result = await services.find().limit(6).toArray();
-      else
-        result = await services.find().toArray();
+      if (limit) result = await services.find().limit(6).toArray();
+      else result = await services.find().toArray();
       res.send(result);
     });
     // Api endpoint for fetching only provider's services data from mongodb
@@ -57,6 +55,35 @@ async function run() {
       // console.log(result);
 
       res.send({ success: true, result });
+    });
+
+    //My services
+    app.get("/my-bookings", async (req, res) => {
+      try {
+        const email = req.query.email;
+
+        const myBookings = await bookings
+          .find({ customerEmail: email })
+          .toArray();
+
+        const serviceIds = myBookings.map(
+          (booking) => new ObjectId(booking.serviceId),
+        );
+
+        const servicesDetails = await Promise.all(
+          serviceIds.map((id) => services.findOne({ _id: id })),
+        );
+
+        res.send({
+          success: true,
+          data: servicesDetails,
+        });
+      } catch (error) {
+        res.status(500).send({
+          success: false,
+          message: "Failed to fetch booked services",
+        });
+      }
     });
 
     //POST: Api endpoint to add a new service to mongodb
