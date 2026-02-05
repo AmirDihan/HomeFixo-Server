@@ -29,9 +29,15 @@ async function run() {
     const bookings = db.collection("bookings");
 
     // GET:
-    // Api endpoint for fetching all the services data from mongodb
+    // Api endpoint for fetching all the services data and limited data from mongodb
     app.get("/services", async (req, res) => {
-      const result = await services.find().toArray();
+      const limit = req.query.limit;
+      // console.log(limit);
+      var result;
+      if(limit)
+        result = await services.find().limit(6).toArray();
+      else
+        result = await services.find().toArray();
       res.send(result);
     });
     // Api endpoint for fetching only provider's services data from mongodb
@@ -69,11 +75,11 @@ async function run() {
       const data = req.body;
       console.log(data);
       const result = await bookings.insertOne(data);
-      
+
       res.send({
         success: true,
         result,
-      })
+      });
     });
 
     // PUT/PATCH
