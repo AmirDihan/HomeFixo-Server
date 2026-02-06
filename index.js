@@ -22,7 +22,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const db = client.db("HomeFixo");
     const services = db.collection("services");
@@ -58,6 +58,7 @@ async function run() {
     });
 
     //My services
+    // My bookings with service details (manual merge)
     app.get("/my-bookings", async (req, res) => {
       try {
         const email = req.query.email;
@@ -70,18 +71,30 @@ async function run() {
           (booking) => new ObjectId(booking.serviceId),
         );
 
-        const servicesDetails = await Promise.all(
-          serviceIds.map((id) => services.findOne({ _id: id })),
-        );
+        const servicesDetails = await services
+          .find({ _id: { $in: serviceIds } })
+          .toArray();
+
+        const result = myBookings.map((booking) => {
+          const service = servicesDetails.find(
+            (s) => s._id.toString() === booking.serviceId,
+          );
+
+          return {
+            ...booking,
+            service, 
+          };
+        });
 
         res.send({
           success: true,
-          data: servicesDetails,
+          data: result,
         });
       } catch (error) {
         res.status(500).send({
           success: false,
           message: "Failed to fetch booked services",
+          error: error.message,
         });
       }
     });
@@ -100,7 +113,7 @@ async function run() {
 
     app.post("/booking", async (req, res) => {
       const data = req.body;
-      console.log(data);
+      // console.log(data);
       const result = await bookings.insertOne(data);
 
       res.send({
@@ -136,8 +149,19 @@ async function run() {
       res.send({ success: true, result });
     });
 
+    app.delete("/delete-booking/:id", async (req, res) => {
+      const { id } = req.params;
+
+      const result = await bookings.deleteOne({_id : new ObjectId(id)});
+
+      res.send({
+        success:true,
+        result
+      })
+    });
+
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!",
     );
